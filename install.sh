@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
-# Install these dotfiles into the current environment (claude/* -> ~/.claude/*).
+# Install these dotfiles into the current environment:
+#   claude/* -> ~/.claude/*
+#   config/* -> ~/.config/*
 #
 # Two modes:
 #   symlink (default)  links back to this repo — edits show up in git right away.
@@ -15,13 +17,15 @@
 #   ./install.sh --force          # replace conflicting paths without backing up
 #
 # Env:
-#   CLAUDE_CONFIG_DIR   target dir (default: ~/.claude)
+#   CLAUDE_CONFIG_DIR   target for claude/ (default: ~/.claude)
+#   XDG_CONFIG_HOME     target for config/ (default: ~/.config)
 #   DOTFILES_MODE       copy|symlink — same as --copy / default
 #
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_HOME="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+XDG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 BACKUP_DIR="$CLAUDE_HOME/dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
 MODE="${DOTFILES_MODE:-symlink}"
@@ -34,7 +38,7 @@ for arg in "$@"; do
     --symlink|-s) MODE=symlink ;;
     --dry-run|-n) DRY_RUN=1 ;;
     --force|-f)   FORCE=1 ;;
-    --help|-h)    sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --help|-h)    sed -n '2,23p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
 done
@@ -103,26 +107,34 @@ install_copy() {
 }
 
 log "dotfiles: $DOTFILES_DIR"
-log "target:   $CLAUDE_HOME"
+log "target:   $CLAUDE_HOME, $XDG_HOME"
 log "mode:     $MODE"
 [ "$DRY_RUN" -eq 1 ] && log "(dry run — nothing will be changed)"
 log ""
 
-run mkdir -p "$CLAUDE_HOME"
+# Install every top-level entry of repo dir $1 into target dir $2.
+install_tree() {
+  local src_root="$1" dest_root="$2" entry name
+  [ -d "$src_root" ] || return 0
+  run mkdir -p "$dest_root"
 
-shopt -s nullglob dotglob
-for entry in "$DOTFILES_DIR"/claude/*; do
-  name="$(basename "$entry")"
-  case "$name" in
-    .gitkeep|.DS_Store) continue ;;
-  esac
-  if [ "$MODE" = copy ]; then
-    install_copy "$entry" "$CLAUDE_HOME/$name"
-  else
-    install_symlink "$entry" "$CLAUDE_HOME/$name"
-  fi
-done
-shopt -u nullglob dotglob
+  shopt -s nullglob dotglob
+  for entry in "$src_root"/*; do
+    name="$(basename "$entry")"
+    case "$name" in
+      .gitkeep|.DS_Store) continue ;;
+    esac
+    if [ "$MODE" = copy ]; then
+      install_copy "$entry" "$dest_root/$name"
+    else
+      install_symlink "$entry" "$dest_root/$name"
+    fi
+  done
+  shopt -u nullglob dotglob
+}
+
+install_tree "$DOTFILES_DIR/claude" "$CLAUDE_HOME"
+install_tree "$DOTFILES_DIR/config" "$XDG_HOME"
 
 log ""
 log "done."

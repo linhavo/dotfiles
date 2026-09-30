@@ -6,11 +6,15 @@ Personal dotfiles, starting with Claude Code configuration.
 
 ```
 claude/           # installed into ~/.claude
-  agents/         # custom subagents
+  CLAUDE.md       # global instructions for every project
+  settings.json   # model, effort, status line, plugins
+  agents/         # custom subagents (implementer)
   commands/       # slash commands
   hooks/          # hook scripts
   output-styles/  # output styles
-  skills/         # skills
+  skills/         # skills (handoff)
+config/           # installed into ~/.config
+  ccstatusline/   # status line layout
 install.sh        # puts everything in place
 ```
 
@@ -52,6 +56,8 @@ Set `CLAUDE_CONFIG_DIR` if the target is not `~/.claude`, or
 `DOTFILES_MODE=copy` to pick the mode by environment rather than by flag.
 
 ## Notes
+
+The status line needs `ccstatusline` on `PATH` (`npm i -g ccstatusline`).
 
 `~/.claude/plugins` is deliberately not tracked — Claude Code manages that
 directory itself, so keeping it under version control fights with plugin

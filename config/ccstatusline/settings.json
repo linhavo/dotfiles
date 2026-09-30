@@ -1,0 +1,91 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "1",
+        "type": "model",
+        "color": "cyan",
+        "rawValue": true
+      },
+      {
+        "id": "2",
+        "type": "separator"
+      },
+      {
+        "id": "d2f4d072-f541-4093-8e7f-c41bf914f4d3",
+        "type": "thinking-effort",
+        "rawValue": true
+      },
+      {
+        "id": "788466b2-62a1-42ad-aa17-93f1ceab9004",
+        "type": "separator"
+      },
+      {
+        "id": "01c03128-d9cc-43a9-8fdd-2549446e5bd2",
+        "type": "context-percentage",
+        "rawValue": true,
+        "metadata": {
+          "display": "slider"
+        }
+      }
+    ],
+    [
+      {
+        "id": "7a500a59-08cc-435a-8b17-021a6f26c79e",
+        "type": "session-usage",
+        "rawValue": true,
+        "metadata": {
+          "display": "progress-short"
+        }
+      },
+      {
+        "id": "2c0904dc-8cc8-44d8-b313-7553905a27cd",
+        "type": "separator"
+      },
+      {
+        "id": "50c06855-b910-4526-a7b2-95e3261e4b69",
+        "type": "reset-timer",
+        "rawValue": true
+      },
+      {
+        "id": "c918b7c8-e9a1-4df8-bd9a-f6c6f17a0657",
+        "type": "separator"
+      },
+      {
+        "id": "cb8c3051-76c2-4c77-9019-f5727df8cbcd",
+        "type": "weekly-usage",
+        "rawValue": true,
+        "metadata": {
+          "display": "time"
+        }
+      }
+    ],
+    []
+  ],
+  "flexMode": "full-minus-40",
+  "compactThreshold": 60,
+  "colorLevel": 2,
+  "defaultPaddingSide": "both",
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "gitCacheTtlSeconds": 5,
+  "minimalistMode": false,
+  "powerline": {
+    "enabled": false,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [],
+    "endCaps": [],
+    "autoAlign": false,
+    "continueThemeAcrossLines": false
+  },
+  "installation": {
+    "method": "pinned",
+    "installedVersion": "2.2.27"
+  }
+}
