@@ -39,8 +39,9 @@ Two modes:
 | Use for | your own machine | devcontainers, cloud sessions, images |
 
 Both are idempotent and safe to re-run, including switching between modes.
-Copy mode merges into existing directories, so entries already in
-`~/.claude/skills` that this repo does not carry are left alone.
+Both merge into existing directories rather than clobbering them, so entries
+already in `~/.claude/skills` that this repo does not carry (e.g. the
+Claude Code-managed `synced/`) are left alone.
 
 Anything replaced is moved to `~/.claude/dotfiles-backup/<timestamp>/`
 unless `--force` is passed.

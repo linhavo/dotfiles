@@ -67,10 +67,25 @@ clear_dest() {
 }
 
 install_symlink() {
-  local src="$1" dest="$2"
+  local src="$1" dest="$2" child
 
   if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
     log "ok        $dest (already linked)"
+    return
+  fi
+
+  # A real directory already at the target keeps entries this repo does not
+  # carry (e.g. ~/.claude/skills/synced), so link its children one level down
+  # instead of replacing the directory itself.
+  if [ -d "$src" ] && [ -d "$dest" ] && [ ! -L "$dest" ]; then
+    shopt -s nullglob dotglob
+    for child in "$src"/*; do
+      case "$(basename "$child")" in
+        .gitkeep|.DS_Store) continue ;;
+      esac
+      install_symlink "$child" "$dest/$(basename "$child")"
+    done
+    shopt -u nullglob dotglob
     return
   fi
 
