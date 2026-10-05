@@ -1,3 +1,9 @@
+---
+name: card
+description: Implement a YouTrack card end-to-end via explorer and implementer subagents
+argument-hint: <card-id, e.g. DG-796>
+---
+
 Start work on $ARGUMENTS.
 
 1. Read the card from YouTrack.
