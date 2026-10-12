@@ -7,12 +7,12 @@ Personal dotfiles, starting with Claude Code configuration.
 ```
 claude/           # installed into ~/.claude
   CLAUDE.md       # global instructions for every project
-  settings.json   # model, effort, status line, plugins
-  agents/         # custom subagents (implementer)
+  settings.json   # model, permissions, effort, status line, plugins
+  agents/         # custom subagents (explorer, implementer)
   commands/       # slash commands
   hooks/          # hook scripts
   output-styles/  # output styles
-  skills/         # skills (handoff)
+  skills/         # skills (card, handoff)
 config/           # installed into ~/.config
   ccstatusline/   # status line layout
 install.sh        # puts everything in place
@@ -43,7 +43,7 @@ Both merge into existing directories rather than clobbering them, so entries
 already in `~/.claude/skills` that this repo does not carry (e.g. the
 Claude Code-managed `synced/`) are left alone.
 
-Anything replaced is moved to `~/.claude/dotfiles-backup/<timestamp>/`
+Anything replaced is moved to `~/.claude/dotfiles-backup/<timestamp>/<original path>`
 unless `--force` is passed.
 
 ### Devcontainers

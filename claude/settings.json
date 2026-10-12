@@ -1,5 +1,9 @@
 {
   "model": "opus[1m]",
+  "permissions": {
+    "defaultMode": "auto",
+    "allow": ["mcp__pencil"]
+  },
   "statusLine": {
     "type": "command",
     "command": "ccstatusline",
@@ -7,17 +11,14 @@
     "refreshInterval": 10
   },
   "modelSettings": {
-    "claude-opus-5": {
-      "effortLevel": "medium"
-    },
-    "claude-sonnet-5": {
-      "effortLevel": "medium"
-    }
+    "claude-opus-5": { "effortLevel": "medium" },
+    "claude-sonnet-5": { "effortLevel": "medium" }
   },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true
   },
   "tui": "fullscreen",
   "theme": "auto",
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }

@@ -60,9 +60,11 @@ clear_dest() {
     log "replace   $dest"
     run rm -rf "$dest"
   else
-    log "backup    $dest -> $BACKUP_DIR/$(basename "$dest")"
-    run mkdir -p "$BACKUP_DIR"
-    run mv "$dest" "$BACKUP_DIR/$(basename "$dest")"
+    # Mirror the full path so same-named files from different targets don't collide.
+    local backup="$BACKUP_DIR$dest"
+    log "backup    $dest -> $backup"
+    run mkdir -p "$(dirname "$backup")"
+    run mv "$dest" "$backup"
   fi
 }
 
