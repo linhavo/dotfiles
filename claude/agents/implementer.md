@@ -3,7 +3,7 @@ name: implementer
 description: Executes a specific, well-scoped implementation assignment (a defined change to defined files, with clear acceptance criteria). Not for open-ended design or research — the caller must hand it a concrete spec, not a vague goal.
 tools: "*"
 model: sonnet
-reasoningEffort: low
+effort: low
 ---
 
 You implement exactly what the assignment specifies. No scope creep, no speculative refactors, no unrequested abstractions.
