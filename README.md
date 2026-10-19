@@ -15,6 +15,7 @@ claude/           # installed into ~/.claude
   skills/         # skills (card, handoff)
 config/           # installed into ~/.config
   ccstatusline/   # status line layout
+  tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 install.sh        # puts everything in place
 ```
 
@@ -57,6 +58,9 @@ Set `CLAUDE_CONFIG_DIR` if the target is not `~/.claude`, or
 `DOTFILES_MODE=copy` to pick the mode by environment rather than by flag.
 
 ## Notes
+
+tmux reads `~/.tmux.conf` before `~/.config/tmux/tmux.conf`.
+Remove `~/.tmux.conf` so the tracked config takes effect.
 
 The status line needs `ccstatusline` on `PATH` (`npm i -g ccstatusline`).
 
