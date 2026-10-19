@@ -15,6 +15,7 @@ claude/           # installed into ~/.claude
   skills/         # skills (card, handoff)
 config/           # installed into ~/.config
   ccstatusline/   # status line layout
+  git/            # shared git config, SSH commit signing
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 install.sh        # puts everything in place
 ```
@@ -61,6 +62,18 @@ Set `CLAUDE_CONFIG_DIR` if the target is not `~/.claude`, or
 
 tmux reads `~/.tmux.conf` before `~/.config/tmux/tmux.conf`.
 Remove `~/.tmux.conf` so the tracked config takes effect.
+
+Git identity stays out of this public repo, in an untracked `~/.gitconfig`.
+On a new machine, set it once:
+
+```sh
+git config --global user.name "Your Name"
+git config --global user.email you@example.com
+git config --global user.signingkey ~/.ssh/id_ed25519.pub
+echo "you@example.com $(cat ~/.ssh/id_ed25519.pub)" >> ~/.ssh/allowed_signers
+```
+
+`~/.ssh/allowed_signers` lets git verify signatures locally.
 
 The status line needs `ccstatusline` on `PATH` (`npm i -g ccstatusline`).
 
