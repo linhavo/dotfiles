@@ -17,11 +17,35 @@ config/           # installed into ~/.config
   ccstatusline/   # status line layout
   git/            # shared git config, SSH commit signing
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
+Brewfile          # macOS packages for bootstrap.sh
+bootstrap.sh      # installs the essentials, then runs install.sh
 install.sh        # puts everything in place
 ```
 
 Anything you add at the top level of `claude/` (e.g. `settings.json`,
 `CLAUDE.md`) is picked up automatically — the installer walks every entry.
+
+## New machine
+
+Without a clone (it clones into `~/.dotfiles`, or `$DOTFILES_HOME`):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/linhavo/dotfiles/main/bootstrap.sh | bash
+```
+
+From a clone:
+
+```sh
+git clone git@github.com:linhavo/dotfiles.git && cd dotfiles
+./bootstrap.sh --dry-run   # preview
+./bootstrap.sh             # install tools, then run install.sh
+```
+
+`bootstrap.sh` detects the OS and package manager, then installs Claude Code,
+tmux, Node, ccstatusline, gh, lazygit and the JetBrainsMono Nerd Font.
+It uses Homebrew on macOS and apt, dnf or pacman on Linux.
+It skips tools that are already installed, and skips the font in containers.
+Other options, such as `--copy`, pass through to `install.sh`.
 
 ## Install
 
