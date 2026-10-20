@@ -85,6 +85,30 @@ install_homebrew() {
   fi
 }
 
+# Install distro packages quietly; the output is shown only when the install fails.
+pkg_install() {
+  [ "$#" -gt 0 ] || return 0
+  log "install   $*"
+  if [ "$DRY_RUN" -eq 1 ]; then log "  would install with $PKG: $*"; return; fi
+  local out
+  out="$(mktemp)"
+  if ! {
+    case "$PKG" in
+      apt)
+        as_root env DEBIAN_FRONTEND=noninteractive apt-get update -q &&
+        as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends "$@" ;;
+      dnf)    as_root dnf install -y -q --setopt=install_weak_deps=False "$@" ;;
+      pacman) as_root pacman -Sy --needed --noconfirm "$@" ;;
+    esac
+  } >"$out" 2>&1; then
+    cat "$out" >&2
+    rm -f "$out"
+    echo "package install failed: $*" >&2
+    exit 1
+  fi
+  rm -f "$out"
+}
+
 # ── Fetch the repo when piped ────────────────
 if [ ! -f "$DOTFILES_DIR/install.sh" ]; then
   target="${DOTFILES_HOME:-$HOME/.dotfiles}"
@@ -93,12 +117,7 @@ if [ ! -f "$DOTFILES_DIR/install.sh" ]; then
   if [ "$OS" = Darwin ]; then
     xcode-select -p >/dev/null 2>&1 || install_homebrew
   elif ! has git; then
-    log "install   git"
-    case "$PKG" in
-      apt)    as_root apt-get update; as_root apt-get install -y git ca-certificates ;;
-      dnf)    as_root dnf install -y git ;;
-      pacman) as_root pacman -Sy --needed --noconfirm git ;;
-    esac
+    if [ "$PKG" = apt ]; then pkg_install git ca-certificates; else pkg_install git; fi
   fi
 
   if [ -d "$target/.git" ]; then
@@ -128,17 +147,27 @@ install_macos() {
 }
 
 install_linux() {
-  case "$PKG" in
-    apt)
-      as_root apt-get update
-      as_root apt-get install -y curl git tmux nodejs npm gh
-      # lazygit is only packaged in newer Debian/Ubuntu releases.
-      apt-cache show lazygit >/dev/null 2>&1 && as_root apt-get install -y lazygit ;;
-    dnf)
-      as_root dnf install -y curl git tmux nodejs npm gh ;;
-    pacman)
-      as_root pacman -Sy --needed --noconfirm curl git tmux nodejs npm github-cli lazygit ;;
-  esac
+  # Ask only for what is missing, so an image that ships Node or git keeps its own.
+  local pkgs=()
+  has curl || pkgs+=(curl)
+  has git  || pkgs+=(git)
+  has tmux || pkgs+=(tmux)
+  has node || pkgs+=(nodejs)
+  has npm  || pkgs+=(npm)
+  if ! has gh; then
+    if [ "$PKG" = pacman ]; then pkgs+=(github-cli); else pkgs+=(gh); fi
+  fi
+  # lazygit is packaged by pacman and newer Debian/Ubuntu; elsewhere the release binary is used.
+  if ! has lazygit; then
+    case "$PKG" in
+      pacman) pkgs+=(lazygit) ;;
+      apt)    if apt-cache show lazygit >/dev/null 2>&1; then pkgs+=(lazygit); fi ;;
+    esac
+  fi
+  # Without recommends, apt does not pull in CA certificates for curl and git.
+  if [ "$PKG" = apt ] && [ "${#pkgs[@]}" -gt 0 ]; then pkgs+=(ca-certificates); fi
+
+  if [ "${#pkgs[@]}" -eq 0 ]; then log "ok        system packages"; else pkg_install "${pkgs[@]}"; fi
 
   has lazygit || install_lazygit_release
   if [ "$IN_CONTAINER" -eq 1 ]; then
