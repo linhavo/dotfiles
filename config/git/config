@@ -9,13 +9,3 @@
 	pl = pull
 	A = add -A
 	cm = commit -m
-
-# Sign commits and tags with the SSH key named in user.signingkey.
-[gpg]
-	format = ssh
-[gpg "ssh"]
-	allowedSignersFile = ~/.ssh/allowed_signers
-[commit]
-	gpgsign = true
-[tag]
-	gpgsign = true

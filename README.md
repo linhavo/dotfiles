@@ -15,7 +15,7 @@ claude/           # installed into ~/.claude
   skills/         # skills (card, handoff)
 config/           # installed into ~/.config
   ccstatusline/   # status line layout
-  git/            # shared git config, SSH commit signing
+  git/            # shared git config
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 Brewfile          # macOS packages for bootstrap.sh
 bootstrap.sh      # installs the essentials, then runs install.sh
@@ -93,11 +93,7 @@ On a new machine, set it once:
 ```sh
 git config --global user.name "Your Name"
 git config --global user.email you@example.com
-git config --global user.signingkey ~/.ssh/id_ed25519.pub
-echo "you@example.com $(cat ~/.ssh/id_ed25519.pub)" >> ~/.ssh/allowed_signers
 ```
-
-`~/.ssh/allowed_signers` lets git verify signatures locally.
 
 The status line needs `ccstatusline` on `PATH` (`npm i -g ccstatusline`).
 
