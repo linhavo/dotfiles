@@ -46,6 +46,7 @@ tmux, Node, ccstatusline, gh, lazygit and the JetBrainsMono Nerd Font.
 It uses Homebrew on macOS and apt, dnf or pacman on Linux.
 It skips tools that are already installed, and skips the font in containers.
 Other options, such as `--copy`, pass through to `install.sh`.
+After `install.sh`, it installs the Claude Code plugins that `claude/settings.json` enables.
 
 ## Install
 

@@ -6,6 +6,7 @@
 #   containers     same as Linux, but no Nerd Font (the host terminal renders fonts)
 #
 # Essentials: Claude Code, tmux, Node, ccstatusline, gh, lazygit, JetBrainsMono Nerd Font.
+# After install.sh, it installs the Claude Code plugins that claude/settings.json enables.
 # Anything already installed is skipped, so re-running is safe.
 #
 # Usage:
@@ -33,7 +34,7 @@ for arg in "$@"; do
   case "$arg" in
     --dry-run|-n) DRY_RUN=1; INSTALL_ARGS+=("$arg") ;;
     --help|-h)
-      if [ -f "${BASH_SOURCE[0]:-}" ]; then sed -n '2,23p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+      if [ -f "${BASH_SOURCE[0]:-}" ]; then sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
       else echo "see the header of bootstrap.sh in $REPO_URL"
       fi
       exit 0 ;;
@@ -227,6 +228,27 @@ install_ccstatusline() {
   fi
 }
 
+# Install the marketplace plugins that claude/settings.json enables; builtin ones need no install.
+install_claude_plugins() {
+  if ! has claude || ! has node; then log "skip      claude plugins (claude or node not on PATH)"; return; fi
+  local wanted installed plugin
+  wanted="$(node -e '
+    const s = require(process.argv[1]);
+    for (const [id, on] of Object.entries(s.enabledPlugins || {}))
+      if (on && !id.endsWith("@builtin")) console.log(id);
+  ' "$DOTFILES_DIR/claude/settings.json")"
+  installed="$(claude plugin list --json 2>/dev/null | node -e '
+    let d = ""; process.stdin.on("data", c => d += c).on("end", () => {
+      for (const p of JSON.parse(d || "[]")) if (p.scope === "user") console.log(p.id);
+    });
+  ' || true)"
+  for plugin in $wanted; do
+    if printf '%s\n' "$installed" | grep -qxF "$plugin"; then log "ok        $plugin"; continue; fi
+    log "install   $plugin"
+    run claude plugin install "$plugin"
+  done
+}
+
 if [ "$OS" = Darwin ]; then install_macos; else install_linux; fi
 install_claude
 install_ccstatusline
@@ -234,3 +256,7 @@ install_ccstatusline
 log ""
 # The +-guard keeps an empty array working under set -u on macOS bash 3.2.
 "$DOTFILES_DIR/install.sh" ${INSTALL_ARGS[@]+"${INSTALL_ARGS[@]}"}
+
+# Runs after install.sh, so plugin installs update the settings.json this repo placed.
+log ""
+install_claude_plugins
