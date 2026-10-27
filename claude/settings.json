@@ -28,7 +28,8 @@
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "mattpocock-skills@claude-plugins-official": true,
-    "cc-plugin-you-should-know@builtin": true
+    "cc-plugin-you-should-know@builtin": true,
+    "linear@anthropic-plugin-directory": true
   },
   "modelSettings": {
     "claude-opus-5-5": {
