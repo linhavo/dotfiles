@@ -17,6 +17,8 @@ config/           # installed into ~/.config
   ccstatusline/   # status line layout
   git/            # shared git config
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
+home/             # installed into ~
+  .zshrc          # history, completion, autosuggestions, highlighting, starship, pnpm PATH
 Brewfile          # macOS packages for bootstrap.sh
 bootstrap.sh      # installs the essentials, then runs install.sh
 install.sh        # puts everything in place

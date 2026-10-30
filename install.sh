@@ -3,6 +3,7 @@
 # Install these dotfiles into the current environment:
 #   claude/* -> ~/.claude/*
 #   config/* -> ~/.config/*
+#   home/*   -> ~/*
 #
 # Two modes:
 #   symlink (default)  links back to this repo — edits show up in git right away.
@@ -124,7 +125,7 @@ install_copy() {
 }
 
 log "dotfiles: $DOTFILES_DIR"
-log "target:   $CLAUDE_HOME, $XDG_HOME"
+log "target:   $CLAUDE_HOME, $XDG_HOME, $HOME"
 log "mode:     $MODE"
 [ "$DRY_RUN" -eq 1 ] && log "(dry run — nothing will be changed)"
 log ""
@@ -152,6 +153,7 @@ install_tree() {
 
 install_tree "$DOTFILES_DIR/claude" "$CLAUDE_HOME"
 install_tree "$DOTFILES_DIR/config" "$XDG_HOME"
+install_tree "$DOTFILES_DIR/home" "$HOME"
 
 log ""
 log "done."
