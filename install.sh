@@ -92,8 +92,8 @@ install_symlink() {
     return
   fi
 
-  [ -e "$dest" ] || [ -L "$dest" ] || log "link      $dest"
   clear_dest "$dest"
+  log "link      $dest"
   run mkdir -p "$(dirname "$dest")"
   run ln -s "$src" "$dest"
 }
