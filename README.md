@@ -24,8 +24,8 @@ bootstrap.sh      # installs the essentials, then runs install.sh
 install.sh        # puts everything in place
 ```
 
-Anything you add at the top level of `claude/` (e.g. `settings.json`,
-`CLAUDE.md`) is picked up automatically — the installer walks every entry.
+Anything you add at the top level of `claude/`, `config/` or `home/` (e.g.
+`claude/settings.json`, `home/.zshrc`) is picked up automatically — the installer walks every entry.
 
 ## New machine
 
@@ -63,7 +63,7 @@ Two modes:
 
 | | symlink (default) | copy (`--copy`) |
 |---|---|---|
-| Edits in `~/.claude` | land in the repo, show up in `git status` | are local only, lost on rebuild |
+| Edits in `~/.claude`, `~/.config` or `~/.zshrc` | land in the repo, show up in `git status` | are local only, lost on rebuild |
 | Repo must stay put | yes — moving it leaves dangling links | no |
 | Use for | your own machine | devcontainers, cloud sessions, images |
 
@@ -73,7 +73,7 @@ already in `~/.claude/skills` that this repo does not carry (e.g. the
 Claude Code-managed `synced/`) are left alone.
 
 Anything replaced is moved to `~/.claude/dotfiles-backup/<timestamp>/<original path>`
-unless `--force` is passed.
+unless `--force` is passed, for every target — e.g. `~/.zshrc` goes to `~/.claude/dotfiles-backup/<timestamp>/Users/<you>/.zshrc`.
 
 ### Devcontainers
 
@@ -97,6 +97,9 @@ On a new machine, set it once:
 git config --global user.name "Your Name"
 git config --global user.email you@example.com
 ```
+
+Machine-local shell settings and secrets go in an untracked `~/.zshrc.local`, which `.zshrc` sources.
+Installers that append to `~/.zshrc` (e.g. `pnpm setup`) write into this repo, so move such lines there.
 
 The status line needs `ccstatusline` on `PATH` (`npm i -g ccstatusline`).
 
