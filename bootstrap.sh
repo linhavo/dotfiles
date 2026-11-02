@@ -5,7 +5,7 @@
 #   Linux          apt, dnf or pacman, whichever the machine has
 #   containers     same as Linux, but no Nerd Font (the host terminal renders fonts)
 #
-# Essentials: Claude Code, tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
+# Essentials: Claude Code, zsh, tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
 # zsh-syntax-highlighting, JetBrainsMono Nerd Font.
 # After install.sh, it installs the Claude Code plugins that claude/settings.json enables.
 # Anything already installed is skipped, so re-running is safe.
@@ -153,6 +153,7 @@ install_linux() {
   local pkgs=()
   has curl || pkgs+=(curl)
   has git  || pkgs+=(git)
+  has zsh  || pkgs+=(zsh)
   has tmux || pkgs+=(tmux)
   has node || pkgs+=(nodejs)
   has npm  || pkgs+=(npm)
@@ -182,6 +183,7 @@ install_linux() {
   if [ "${#pkgs[@]}" -eq 0 ]; then log "ok        system packages"; else pkg_install "${pkgs[@]}"; fi
 
   has lazygit || install_lazygit_release
+  use_zsh_login_shell
   has starship || install_starship_release
   if [ "$IN_CONTAINER" -eq 1 ]; then
     log "skip      JetBrainsMono Nerd Font (container)"
@@ -208,6 +210,19 @@ install_lazygit_release() {
   mkdir -p "$HOME/.local/bin"
   install -m 755 "$tmp/lazygit" "$HOME/.local/bin/lazygit"
   rm -rf "$tmp"
+}
+
+# Make zsh the login shell, so terminals and tmux load .zshrc without an extra `exec zsh`.
+use_zsh_login_shell() {
+  local user current zsh_path
+  user="$(id -un)"
+  current="$(getent passwd "$user" | cut -d: -f7)"
+  zsh_path="$(command -v zsh || echo /usr/bin/zsh)"
+  case "$current" in
+    */zsh) log "ok        login shell (zsh)"; return ;;
+  esac
+  log "set       login shell $current -> $zsh_path"
+  as_root chsh -s "$zsh_path" "$user"
 }
 
 # Report whether zsh plugin $1 sits in one of the paths .zshrc sources it from.

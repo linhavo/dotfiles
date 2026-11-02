@@ -43,11 +43,12 @@ git clone git@github.com:linhavo/dotfiles.git && cd dotfiles
 ./bootstrap.sh             # install tools, then run install.sh
 ```
 
-`bootstrap.sh` detects the OS and package manager, then installs Claude Code,
+`bootstrap.sh` detects the OS and package manager, then installs Claude Code, zsh,
 tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
 zsh-syntax-highlighting and the JetBrainsMono Nerd Font.
 It uses Homebrew on macOS and apt, dnf or pacman on Linux.
 It skips tools that are already installed, and skips the font in containers.
+On Linux, it makes zsh the login shell, so new terminals and tmux load `.zshrc`.
 Other options, such as `--copy`, pass through to `install.sh`.
 After `install.sh`, it installs the Claude Code plugins that `claude/settings.json` enables.
 
