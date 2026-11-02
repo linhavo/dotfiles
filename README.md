@@ -44,7 +44,8 @@ git clone git@github.com:linhavo/dotfiles.git && cd dotfiles
 ```
 
 `bootstrap.sh` detects the OS and package manager, then installs Claude Code,
-tmux, Node, ccstatusline, gh, lazygit and the JetBrainsMono Nerd Font.
+tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
+zsh-syntax-highlighting and the JetBrainsMono Nerd Font.
 It uses Homebrew on macOS and apt, dnf or pacman on Linux.
 It skips tools that are already installed, and skips the font in containers.
 Other options, such as `--copy`, pass through to `install.sh`.
@@ -79,8 +80,12 @@ unless `--force` is passed, for every target — e.g. `~/.zshrc` goes to `~/.cla
 
 ```jsonc
 // .devcontainer/devcontainer.json
-"postCreateCommand": "git clone https://github.com/<you>/dotfiles ~/.dotfiles && ~/.dotfiles/install.sh --copy"
+"postCreateCommand": "git clone https://github.com/<you>/dotfiles ~/.dotfiles && ~/.dotfiles/bootstrap.sh --copy"
 ```
+
+`bootstrap.sh` installs starship and the zsh plugins that `.zshrc` expects; `install.sh` alone does not.
+Devcontainer images often ship an oh-my-zsh `~/.zshrc`, which the installer backs up.
+To keep oh-my-zsh (e.g. its git aliases), move its lines into `~/.zshrc.local`; starship still owns the prompt.
 
 Set `CLAUDE_CONFIG_DIR` if the target is not `~/.claude`, or
 `DOTFILES_MODE=copy` to pick the mode by environment rather than by flag.

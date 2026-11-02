@@ -43,11 +43,12 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-# Starship
-command -v starship >/dev/null && eval "$(starship init zsh)"
-
 # Machine-local settings and secrets, kept out of the repo.
 [ -r "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+
+# Starship
+## Loads after .zshrc.local so a local prompt theme (e.g. oh-my-zsh) does not replace it.
+command -v starship >/dev/null && eval "$(starship init zsh)"
 
 # Syntax highlighting
 ## Colours commands as you type; it must load last so it wraps every other widget.

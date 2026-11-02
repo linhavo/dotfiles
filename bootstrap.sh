@@ -5,7 +5,8 @@
 #   Linux          apt, dnf or pacman, whichever the machine has
 #   containers     same as Linux, but no Nerd Font (the host terminal renders fonts)
 #
-# Essentials: Claude Code, tmux, Node, ccstatusline, gh, lazygit, JetBrainsMono Nerd Font.
+# Essentials: Claude Code, tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
+# zsh-syntax-highlighting, JetBrainsMono Nerd Font.
 # After install.sh, it installs the Claude Code plugins that claude/settings.json enables.
 # Anything already installed is skipped, so re-running is safe.
 #
@@ -165,12 +166,23 @@ install_linux() {
       apt)    if apt-cache show lazygit >/dev/null 2>&1; then pkgs+=(lazygit); fi ;;
     esac
   fi
+  # starship is packaged by pacman and newer Debian/Ubuntu; elsewhere the official installer is used.
+  if ! has starship; then
+    case "$PKG" in
+      pacman) pkgs+=(starship) ;;
+      apt)    if apt-cache show starship >/dev/null 2>&1; then pkgs+=(starship); fi ;;
+    esac
+  fi
+  # The zsh plugins are scripts, not commands, so look for them where .zshrc sources them.
+  has_zsh_plugin zsh-autosuggestions     || pkgs+=(zsh-autosuggestions)
+  has_zsh_plugin zsh-syntax-highlighting || pkgs+=(zsh-syntax-highlighting)
   # Without recommends, apt does not pull in CA certificates for curl and git.
   if [ "$PKG" = apt ] && [ "${#pkgs[@]}" -gt 0 ]; then pkgs+=(ca-certificates); fi
 
   if [ "${#pkgs[@]}" -eq 0 ]; then log "ok        system packages"; else pkg_install "${pkgs[@]}"; fi
 
   has lazygit || install_lazygit_release
+  has starship || install_starship_release
   if [ "$IN_CONTAINER" -eq 1 ]; then
     log "skip      JetBrainsMono Nerd Font (container)"
   else
@@ -196,6 +208,19 @@ install_lazygit_release() {
   mkdir -p "$HOME/.local/bin"
   install -m 755 "$tmp/lazygit" "$HOME/.local/bin/lazygit"
   rm -rf "$tmp"
+}
+
+# Report whether zsh plugin $1 sits in one of the paths .zshrc sources it from.
+has_zsh_plugin() {
+  [ -r "/usr/share/$1/$1.zsh" ] || [ -r "/usr/share/zsh/plugins/$1/$1.zsh" ]
+}
+
+# Fall back to the official starship installer where the distro does not package it.
+install_starship_release() {
+  log "install   starship (official installer)"
+  [ "$DRY_RUN" -eq 1 ] && { log "  would run the starship installer into ~/.local/bin"; return; }
+  mkdir -p "$HOME/.local/bin"
+  curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin" >/dev/null
 }
 
 install_nerd_font_linux() {
