@@ -18,7 +18,7 @@ config/           # installed into ~/.config
   git/            # shared git config
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 home/             # installed into ~
-  .zshrc          # history, completion, autosuggestions, highlighting, starship, pnpm PATH
+  .zshrc          # history, completion (incl. pnpm), autosuggestions, highlighting, starship, pnpm PATH
 Brewfile          # macOS packages for bootstrap.sh
 bootstrap.sh      # installs the essentials, then runs install.sh
 install.sh        # puts everything in place
@@ -45,7 +45,7 @@ git clone git@github.com:linhavo/dotfiles.git && cd dotfiles
 
 `bootstrap.sh` detects the OS and package manager, then installs Claude Code, zsh,
 tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
-zsh-syntax-highlighting and the JetBrainsMono Nerd Font.
+zsh-syntax-highlighting, pnpm-shell-completion and the JetBrainsMono Nerd Font.
 It uses Homebrew on macOS and apt, dnf or pacman on Linux.
 It skips tools that are already installed, and skips the font in containers.
 On Linux, it makes zsh the login shell, so new terminals and tmux load `.zshrc`.

@@ -6,7 +6,7 @@
 #   containers     same as Linux, but no Nerd Font (the host terminal renders fonts)
 #
 # Essentials: Claude Code, zsh, tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
-# zsh-syntax-highlighting, JetBrainsMono Nerd Font.
+# zsh-syntax-highlighting, pnpm-shell-completion, JetBrainsMono Nerd Font.
 # After install.sh, it installs the Claude Code plugins that claude/settings.json enables.
 # Anything already installed is skipped, so re-running is safe.
 #
@@ -268,6 +268,27 @@ install_ccstatusline() {
   fi
 }
 
+# Install the pnpm-shell-completion release where .zshrc sources it; no package manager carries it.
+install_pnpm_completion() {
+  local dir="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/pnpm-shell-completion" target
+  if [ -r "$dir/pnpm-shell-completion.plugin.zsh" ] \
+    || [ -r /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh ]; then
+    log "ok        pnpm-shell-completion"; return
+  fi
+  case "$OS-$ARCH" in
+    Darwin-arm64)                 target=aarch64-apple-darwin ;;
+    Darwin-x86_64)                target=x86_64-apple-darwin ;;
+    Linux-aarch64|Linux-arm64)    target=aarch64-unknown-linux-gnu ;;
+    Linux-x86_64)                 target=x86_64-unknown-linux-gnu ;;
+    *) log "skip      pnpm-shell-completion (no release for $OS $ARCH)"; return ;;
+  esac
+  log "install   pnpm-shell-completion (GitHub release)"
+  [ "$DRY_RUN" -eq 1 ] && { log "  would download $target into $dir"; return; }
+  mkdir -p "$dir"
+  curl -fsSL "https://github.com/g-plane/pnpm-shell-completion/releases/latest/download/pnpm-shell-completion_${target}.tar.gz" \
+    | tar -xz -C "$dir" pnpm-shell-completion pnpm-shell-completion.plugin.zsh
+}
+
 # Install the marketplace plugins that claude/settings.json enables; builtin ones need no install.
 install_claude_plugins() {
   if ! has claude || ! has node; then log "skip      claude plugins (claude or node not on PATH)"; return; fi
@@ -292,6 +313,7 @@ install_claude_plugins() {
 if [ "$OS" = Darwin ]; then install_macos; else install_linux; fi
 install_claude
 install_ccstatusline
+install_pnpm_completion
 
 log ""
 # The +-guard keeps an empty array working under set -u on macOS bash 3.2.

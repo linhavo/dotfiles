@@ -24,6 +24,12 @@ bindkey '^[[Z' reverse-menu-complete                 # Shift-Tab outside the men
 bindkey -M menuselect '^[[Z' reverse-menu-complete   # Shift-Tab inside the menu
 bindkey -M menuselect '^M' .accept-line              # Enter accepts and runs in one press
 
+# pnpm completion
+## Completes package scripts, --filter packages and dependencies; it calls compdef, so it loads after compinit.
+source_first \
+  "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.plugin.zsh" \
+  /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
+
 # Autosuggestions
 ## Fish-like history autosuggestions (grey ghost text, accept with Right Arrow)
 source_first \
