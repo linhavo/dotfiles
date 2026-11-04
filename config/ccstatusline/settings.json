@@ -37,12 +37,22 @@
         "type": "separator"
       },
       {
-        "id": "01c03128-d9cc-43a9-8fdd-2549446e5bd2",
-        "type": "context-percentage",
-        "rawValue": true,
+        "id": "48264f40-c78a-4514-827d-1971afff8572",
+        "type": "context-length",
+        "rawValue": true
+      },
+      {
+        "id": "373d3391-e9d4-4246-9366-faaf6a9eec9b",
+        "type": "separator"
+      },
+      {
+        "id": "e19411e1-261b-429b-80c0-f444ffe2ad67",
+        "type": "context-percentage-usable",
         "metadata": {
-          "display": "slider"
-        }
+          "display": "slider-only",
+          "inverse": "false"
+        },
+        "rawValue": true
       }
     ],
     [
@@ -103,6 +113,6 @@
   },
   "installation": {
     "method": "pinned",
-    "installedVersion": "2.2.27"
+    "installedVersion": "2.2.33"
   }
 }
