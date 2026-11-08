@@ -4,6 +4,7 @@
 #   claude/* -> ~/.claude/*
 #   config/* -> ~/.config/*
 #   home/*   -> ~/*
+#   profiles/<name>/ -> ~/.config/dotfiles/profile  (git and zsh load it on top of the base)
 #
 # Two modes:
 #   symlink (default)  links back to this repo — edits show up in git right away.
@@ -16,11 +17,15 @@
 #   ./install.sh --copy           # copy instead of linking
 #   ./install.sh --dry-run        # show what would happen, change nothing
 #   ./install.sh --force          # replace conflicting paths without backing up
+#   ./install.sh --profile work   # pick a profile; later runs reuse it
+#
+# Profile: --profile, then the saved choice, then "container" inside a container.
 #
 # Env:
 #   CLAUDE_CONFIG_DIR   target for claude/ (default: ~/.claude)
 #   XDG_CONFIG_HOME     target for config/ (default: ~/.config)
 #   DOTFILES_MODE       copy|symlink — same as --copy / default
+#   DOTFILES_PROFILE    same as --profile
 #
 set -euo pipefail
 
@@ -28,26 +33,44 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_HOME="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 XDG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 BACKUP_DIR="$CLAUDE_HOME/dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
+STATE_DIR="$XDG_HOME/dotfiles"
 
 MODE="${DOTFILES_MODE:-symlink}"
+PROFILE="${DOTFILES_PROFILE:-}"
 DRY_RUN=0
 FORCE=0
 
-for arg in "$@"; do
-  case "$arg" in
+while [ "$#" -gt 0 ]; do
+  case "$1" in
     --copy|-c)    MODE=copy ;;
     --symlink|-s) MODE=symlink ;;
     --dry-run|-n) DRY_RUN=1 ;;
     --force|-f)   FORCE=1 ;;
-    --help|-h)    sed -n '2,23p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *) echo "unknown option: $arg" >&2; exit 2 ;;
+    --profile|-p) [ "$#" -ge 2 ] || { echo "--profile needs a name" >&2; exit 2; }
+                  PROFILE="$2"; shift ;;
+    --profile=*)  PROFILE="${1#*=}" ;;
+    --help|-h)    sed -n '2,28p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
+  shift
 done
 
 case "$MODE" in
   copy|symlink) ;;
   *) echo "invalid mode: $MODE (expected copy or symlink)" >&2; exit 2 ;;
 esac
+
+in_container() {
+  [ -f /.dockerenv ] || [ -f /run/.containerenv ] || [ -n "${REMOTE_CONTAINERS:-}" ] \
+    || [ -n "${CODESPACES:-}" ] || [ -n "${DEVPOD:-}" ]
+}
+
+if [ -z "$PROFILE" ] && [ -r "$STATE_DIR/profile-name" ]; then PROFILE="$(cat "$STATE_DIR/profile-name")"; fi
+if [ -z "$PROFILE" ] && in_container; then PROFILE=container; fi
+if [ -n "$PROFILE" ] && [ ! -d "$DOTFILES_DIR/profiles/$PROFILE" ]; then
+  echo "unknown profile: $PROFILE (expected one of: $(ls "$DOTFILES_DIR/profiles" | tr '\n' ' '))" >&2
+  exit 2
+fi
 
 log() { printf '%s\n' "$*"; }
 run() { if [ "$DRY_RUN" -eq 1 ]; then log "  would run: $*"; else "$@"; fi; }
@@ -127,6 +150,7 @@ install_copy() {
 log "dotfiles: $DOTFILES_DIR"
 log "target:   $CLAUDE_HOME, $XDG_HOME, $HOME"
 log "mode:     $MODE"
+log "profile:  ${PROFILE:-none}"
 [ "$DRY_RUN" -eq 1 ] && log "(dry run — nothing will be changed)"
 log ""
 
@@ -154,6 +178,29 @@ install_tree() {
 install_tree "$DOTFILES_DIR/claude" "$CLAUDE_HOME"
 install_tree "$DOTFILES_DIR/config" "$XDG_HOME"
 install_tree "$DOTFILES_DIR/home" "$HOME"
+
+# Install the chosen profile and save its name so later runs reuse it.
+install_profile() {
+  if [ -z "$PROFILE" ]; then
+    log "skip      profile (none chosen; pass --profile <name>)"
+    return
+  fi
+  run mkdir -p "$STATE_DIR"
+  # A link to another profile only points into this repo, so replace it without a backup.
+  local dest="$STATE_DIR/profile" src="$DOTFILES_DIR/profiles/$PROFILE"
+  if [ -L "$dest" ] && [ "$(readlink "$dest")" != "$src" ]; then run rm "$dest"; fi
+  if [ "$MODE" = copy ]; then
+    install_copy "$src" "$dest"
+  else
+    install_symlink "$src" "$dest"
+  fi
+  if [ "$(cat "$STATE_DIR/profile-name" 2>/dev/null)" != "$PROFILE" ]; then
+    log "save      $STATE_DIR/profile-name = $PROFILE"
+    [ "$DRY_RUN" -eq 1 ] || printf '%s\n' "$PROFILE" > "$STATE_DIR/profile-name"
+  fi
+}
+
+install_profile
 
 log ""
 log "done."

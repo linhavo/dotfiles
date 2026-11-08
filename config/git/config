@@ -1,4 +1,8 @@
-# Shared git settings; identity ([user]) stays in the untracked ~/.gitconfig.
+# Shared git settings; identity comes from the profile, and the untracked ~/.gitconfig overrides both.
+
+# Loads the profile that install.sh links; git skips it when it is missing.
+[include]
+	path = ~/.config/dotfiles/profile/gitconfig
 
 [core]
 	# Global hooks: a gitleaks scan, then the repo's own .git/hooks/pre-commit.
@@ -12,3 +16,5 @@
 	pl = pull
 	A = add -A
 	cm = commit -m
+	chp = cherry-pick
+	psfl = push --force-with-lease

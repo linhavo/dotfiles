@@ -14,6 +14,7 @@
 #   ./bootstrap.sh                # install tools, then ./install.sh
 #   ./bootstrap.sh --dry-run      # show what would happen, change nothing
 #   ./bootstrap.sh --copy         # any other option is passed on to install.sh
+#   ./bootstrap.sh --profile work # e.g. the machine profile
 #
 # Without a clone, pipe it from GitHub; it clones the repo, then runs from there:
 #   curl -fsSL https://raw.githubusercontent.com/linhavo/dotfiles/main/bootstrap.sh | bash
@@ -37,7 +38,7 @@ for arg in "$@"; do
   case "$arg" in
     --dry-run|-n) DRY_RUN=1; INSTALL_ARGS+=("$arg") ;;
     --help|-h)
-      if [ -f "${BASH_SOURCE[0]:-}" ]; then sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+      if [ -f "${BASH_SOURCE[0]:-}" ]; then sed -n '2,25p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
       else echo "see the header of bootstrap.sh in $REPO_URL"
       fi
       exit 0 ;;

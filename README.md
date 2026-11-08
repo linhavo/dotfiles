@@ -77,7 +77,47 @@ Claude Code-managed `synced/`) are left alone.
 Anything replaced is moved to `~/.claude/dotfiles-backup/<timestamp>/<original path>`
 unless `--force` is passed, for every target — e.g. `~/.zshrc` goes to `~/.claude/dotfiles-backup/<timestamp>/Users/<you>/.zshrc`.
 
+### Profiles
+
+A profile holds only what differs per machine; it loads on top of the shared config.
+Git loads `profiles/<name>/gitconfig` through `[include]`, and `.zshrc` sources `profiles/<name>/zshrc`.
+Untracked `~/.gitconfig` and `~/.zshrc.local` load last, so they override the profile.
+
+```sh
+./install.sh --profile work   # pick once; later runs reuse the saved choice
+```
+
+`install.sh` picks the profile in this order:
+
+1. `--profile <name>` or `DOTFILES_PROFILE`.
+2. The saved choice in `~/.config/dotfiles/profile-name`.
+3. `container`, when it detects a container.
+
+Without any of these, it installs no profile.
+The reasons behind this layout are in [docs/decisions.md](docs/decisions.md).
+
 ### Devcontainers
+
+Set the dotfiles in VS Code user settings, so no project repo needs a change:
+
+```jsonc
+// VS Code user settings on the host
+"dotfiles.repository": "linhavo/dotfiles",
+"dotfiles.installCommand": "bootstrap.sh"
+```
+
+VS Code clones the repo into each new container and runs the command.
+Without `installCommand`, it runs `install.sh`, which skips the tools.
+Inside a container, `install.sh` picks the `container` profile.
+
+The `container` profile sets no git identity.
+VS Code copies the host `~/.gitconfig` into the container, so containers commit as the host does.
+
+To use the `work` profile in containers, put `"dotfiles.installCommand": "bootstrap.sh --profile work"` in a work VS Code profile.
+The `dotfiles.*` settings are machine-scoped, so a VS Code profile can hold them and Settings Sync skips them.
+This assumes `installCommand` passes arguments through; that is not confirmed yet.
+
+For a project you own, a `postCreateCommand` works too:
 
 ```jsonc
 // .devcontainer/devcontainer.json
@@ -135,13 +175,9 @@ Use it only when you are sure the finding is not a secret.
 tmux reads `~/.tmux.conf` before `~/.config/tmux/tmux.conf`.
 Remove `~/.tmux.conf` so the tracked config takes effect.
 
-Git identity stays out of this public repo, in an untracked `~/.gitconfig`.
-On a new machine, set it once:
-
-```sh
-git config --global user.name "Your Name"
-git config --global user.email you@example.com
-```
+Git identity comes from the profile's `gitconfig`.
+This repo is public, so anything in a profile is public too.
+Put an identity you want to keep private in the untracked `~/.gitconfig`; it overrides the profile.
 
 Machine-local shell settings and secrets go in an untracked `~/.zshrc.local`, which `.zshrc` sources.
 Installers that append to `~/.zshrc` (e.g. `pnpm setup`) write into this repo, so move such lines there.
