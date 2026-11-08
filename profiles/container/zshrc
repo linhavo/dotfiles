@@ -1,0 +1,1 @@
+# Shell settings for container machines; .zshrc sources this before ~/.zshrc.local.

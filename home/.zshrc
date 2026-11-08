@@ -49,6 +49,9 @@ case ":$PATH:" in
 esac
 # pnpm end
 
+# Machine profile (work, personal, container) that install.sh links.
+source_first "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/profile/zshrc"
+
 # Machine-local settings and secrets, kept out of the repo.
 [ -r "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
