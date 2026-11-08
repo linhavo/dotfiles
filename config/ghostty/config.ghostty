@@ -1,0 +1,2 @@
+# Restores windows, tabs and splits on every relaunch, not only after a crash
+window-save-state = always

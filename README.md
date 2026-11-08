@@ -15,6 +15,7 @@ claude/           # installed into ~/.claude
   skills/         # skills (card, handoff)
 config/           # installed into ~/.config
   ccstatusline/   # status line layout
+  ghostty/        # Ghostty terminal config (config.ghostty)
   git/            # shared git config, global hooks (gitleaks pre-commit)
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 home/             # installed into ~
