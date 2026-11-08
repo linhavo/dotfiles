@@ -4,6 +4,7 @@
 - React: no nested/chained ternaries in JSX; extract a helper with early returns. A simple two-way ternary is fine.
 - CLAUDE.md edits: one line where possible.
 - Commits and PR titles follow Conventional Commits. Claude-authored branches: `<type>/claude-<description>`.
+- Cloud sessions: built-in `gh` commands fail (GraphQL is blocked) and branches cannot be deleted; read with `gh api` REST, write with the GitHub MCP tools, and create no scratch branches.
 
 ## Writing style (explanations, docs, commits, PRs)
 
