@@ -113,8 +113,8 @@ Inside a container, `install.sh` picks the `container` profile.
 The `container` profile sets no git identity.
 VS Code copies the host `~/.gitconfig` into the container, so containers commit as the host does.
 
-To use the `work` profile in containers, set `"dotfiles.installCommand": "bootstrap.sh --profile work"` on the work laptop only.
-If Settings Sync is on, add `dotfiles.installCommand` to `settingsSync.ignoredSettings`.
+To use the `work` profile in containers, put `"dotfiles.installCommand": "bootstrap.sh --profile work"` in a work VS Code profile.
+The `dotfiles.*` settings are machine-scoped, so a VS Code profile can hold them and Settings Sync skips them.
 This assumes `installCommand` passes arguments through; that is not confirmed yet.
 
 For a project you own, a `postCreateCommand` works too:

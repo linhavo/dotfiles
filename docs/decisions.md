@@ -28,7 +28,7 @@ Generate `claude/settings.json` with `jq` if Claude Code keeps writing into the 
 
 VS Code copies the host `~/.gitconfig` into a devcontainer, and it overrides the profile.
 So the `container` profile sets no identity, and a work laptop's containers commit with the work email.
-Profile choice for a container lives on the host (VS Code user settings), never in the project's repo.
+Profile choice for a container lives on the host, in a VS Code profile's settings, never in the project's repo.
 
 ## VS Code settings stay out of this repo
 
