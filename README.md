@@ -94,8 +94,30 @@ Untracked `~/.gitconfig` and `~/.zshrc.local` load last, so they override the pr
 3. `container`, when it detects a container.
 
 Without any of these, it installs no profile.
+The reasons behind this layout are in [docs/decisions.md](docs/decisions.md).
 
 ### Devcontainers
+
+Set the dotfiles in VS Code user settings, so no project repo needs a change:
+
+```jsonc
+// VS Code user settings on the host
+"dotfiles.repository": "linhavo/dotfiles",
+"dotfiles.installCommand": "bootstrap.sh"
+```
+
+VS Code clones the repo into each new container and runs the command.
+Without `installCommand`, it runs `install.sh`, which skips the tools.
+Inside a container, `install.sh` picks the `container` profile.
+
+The `container` profile sets no git identity.
+VS Code copies the host `~/.gitconfig` into the container, so containers commit as the host does.
+
+To use the `work` profile in containers, set `"dotfiles.installCommand": "bootstrap.sh --profile work"` on the work laptop only.
+If Settings Sync is on, add `dotfiles.installCommand` to `settingsSync.ignoredSettings`.
+This assumes `installCommand` passes arguments through; that is not confirmed yet.
+
+For a project you own, a `postCreateCommand` works too:
 
 ```jsonc
 // .devcontainer/devcontainer.json
