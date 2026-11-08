@@ -6,7 +6,7 @@
 #   containers     same as Linux, but no Nerd Font (the host terminal renders fonts)
 #
 # Essentials: Claude Code, zsh, tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
-# zsh-syntax-highlighting, pnpm-shell-completion, JetBrainsMono Nerd Font.
+# zsh-syntax-highlighting, pnpm-shell-completion, gitleaks, JetBrainsMono Nerd Font.
 # After install.sh, it installs the Claude Code plugins that claude/settings.json enables.
 # Anything already installed is skipped, so re-running is safe.
 #
@@ -27,6 +27,8 @@
 set -euo pipefail
 
 REPO_URL="${DOTFILES_REPO:-https://github.com/linhavo/dotfiles.git}"
+# gitleaks release that the global pre-commit hook runs; bump it here only.
+GITLEAKS_VERSION="8.30.1"
 # Piped from curl, BASH_SOURCE is empty and this resolves to the current directory.
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-.}")" && pwd)"
 DRY_RUN=0
@@ -290,6 +292,47 @@ install_pnpm_completion() {
     | tar -xz -C "$dir" pnpm-shell-completion pnpm-shell-completion.plugin.zsh
 }
 
+# Install the pinned gitleaks: Homebrew on macOS, the checksum-verified release binary on Linux.
+install_gitleaks() {
+  local current arch asset base tmp
+  current="$(gitleaks version 2>/dev/null | sed 's/^v//' || true)"
+  if [ "$current" = "$GITLEAKS_VERSION" ]; then log "ok        gitleaks $GITLEAKS_VERSION"; return; fi
+
+  if [ "$OS" = Darwin ]; then
+    # Homebrew carries only the current formula, so it can differ from the pin.
+    log "install   gitleaks (Homebrew)"
+    if brew list --formula gitleaks >/dev/null 2>&1; then run brew upgrade gitleaks; else run brew install gitleaks; fi
+    current="$(gitleaks version 2>/dev/null | sed 's/^v//' || true)"
+    if [ "$DRY_RUN" -eq 0 ] && [ "$current" != "$GITLEAKS_VERSION" ]; then
+      log "  note: Homebrew installed gitleaks $current, the pin is $GITLEAKS_VERSION"
+    fi
+    return
+  fi
+
+  case "$ARCH" in
+    x86_64)        arch=x64 ;;
+    aarch64|arm64) arch=arm64 ;;
+    *) log "skip      gitleaks (no release for $ARCH)"; return ;;
+  esac
+  asset="gitleaks_${GITLEAKS_VERSION}_linux_${arch}.tar.gz"
+  base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+  log "install   gitleaks $GITLEAKS_VERSION (GitHub release)${current:+, replacing $current}"
+  [ "$DRY_RUN" -eq 1 ] && { log "  would download $asset, verify its checksum, install into ~/.local/bin"; return; }
+  tmp="$(mktemp -d)"
+  curl -fsSL -o "$tmp/$asset" "$base/$asset"
+  curl -fsSL -o "$tmp/checksums.txt" "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+  # Abort the bootstrap when the archive does not match the published checksum.
+  if ! (cd "$tmp" && grep "  $asset\$" checksums.txt | sha256sum -c --status - 2>/dev/null); then
+    rm -rf "$tmp"
+    echo "gitleaks checksum mismatch (or no checksum listed) for $asset; nothing installed" >&2
+    exit 1
+  fi
+  tar -xzf "$tmp/$asset" -C "$tmp" gitleaks
+  mkdir -p "$HOME/.local/bin"
+  install -m 755 "$tmp/gitleaks" "$HOME/.local/bin/gitleaks"
+  rm -rf "$tmp"
+}
+
 # Install the marketplace plugins that claude/settings.json enables; builtin ones need no install.
 install_claude_plugins() {
   if ! has claude || ! has node; then log "skip      claude plugins (claude or node not on PATH)"; return; fi
@@ -315,6 +358,7 @@ if [ "$OS" = Darwin ]; then install_macos; else install_linux; fi
 install_claude
 install_ccstatusline
 install_pnpm_completion
+install_gitleaks
 
 log ""
 # The +-guard keeps an empty array working under set -u on macOS bash 3.2.

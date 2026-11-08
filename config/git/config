@@ -4,6 +4,9 @@
 [include]
 	path = ~/.config/dotfiles/profile/gitconfig
 
+[core]
+	# Global hooks: a gitleaks scan, then the repo's own .git/hooks/pre-commit.
+	hooksPath = ~/.config/git/hooks
 [push]
 	autoSetupRemote = true
 [alias]
