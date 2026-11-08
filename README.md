@@ -15,7 +15,7 @@ claude/           # installed into ~/.claude
   skills/         # skills (card, handoff)
 config/           # installed into ~/.config
   ccstatusline/   # status line layout
-  git/            # shared git config
+  git/            # shared git config, global hooks (gitleaks pre-commit)
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 home/             # installed into ~
   .zshrc          # history, completion (incl. pnpm), autosuggestions, highlighting, starship, pnpm PATH
@@ -45,7 +45,7 @@ git clone git@github.com:linhavo/dotfiles.git && cd dotfiles
 
 `bootstrap.sh` detects the OS and package manager, then installs Claude Code, zsh,
 tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
-zsh-syntax-highlighting, pnpm-shell-completion and the JetBrainsMono Nerd Font.
+zsh-syntax-highlighting, pnpm-shell-completion, gitleaks and the JetBrainsMono Nerd Font.
 It uses Homebrew on macOS and apt, dnf or pacman on Linux.
 It skips tools that are already installed, and skips the font in containers.
 On Linux, it makes zsh the login shell, so new terminals and tmux load `.zshrc`.
@@ -90,6 +90,45 @@ To keep oh-my-zsh (e.g. its git aliases), move its lines into `~/.zshrc.local`; 
 
 Set `CLAUDE_CONFIG_DIR` if the target is not `~/.claude`, or
 `DOTFILES_MODE=copy` to pick the mode by environment rather than by flag.
+
+## Secret scan (gitleaks)
+
+Every commit on a machine with these dotfiles runs a gitleaks scan of the staged changes.
+The hook comes from dotfiles, so no repo needs its own setup.
+
+- `config/git/config` sets `core.hooksPath = ~/.config/git/hooks`.
+- `config/git/hooks/pre-commit` runs `gitleaks git --pre-commit --staged --redact --verbose --no-banner`.
+- A leak blocks the commit. The output shows the file, line and rule, with the secret redacted.
+- A global `core.hooksPath` replaces each repo's `.git/hooks`. So the global hook also runs the repo's `.git/hooks/pre-commit` when it is executable. The commit fails if either fails.
+- If gitleaks is not installed, the hook prints a warning and lets the commit through. This keeps a fresh machine usable before `bootstrap.sh`.
+
+`bootstrap.sh` installs the version in `GITLEAKS_VERSION`:
+
+- macOS: Homebrew. Homebrew carries only its current formula, so the bootstrap reports when that differs from the pin.
+- Linux: the release binary for x86_64 or arm64, into `~/.local/bin`. The bootstrap verifies it against the release's checksums file and aborts on a mismatch.
+
+Check a machine with:
+
+```sh
+gitleaks version                  # the pinned version
+git config --get core.hooksPath   # ~/.config/git/hooks
+```
+
+### False positives
+
+Fix a false positive in the repo, so the fix holds for every clone:
+
+1. Add `gitleaks:allow` in a comment on the line that triggers the finding.
+2. Or add the finding's `Fingerprint` (e.g. `config.env:github-pat:1`) as a line in `.gitleaksignore` at the repo root.
+
+Last resort: `git commit --no-verify` skips the scan and every other pre-commit hook for that commit.
+Use it only when you are sure the finding is not a secret.
+
+### Limits
+
+- Only `pre-commit` chains to the repo. Other hooks in `.git/hooks` (e.g. `commit-msg`, `pre-push`) do not run while the global `core.hooksPath` is set.
+- A repo that sets its own `core.hooksPath` (e.g. husky) overrides the global one, and the gitleaks hook does not run there.
+- The pre-commit framework (`pre-commit install`) refuses to install while `core.hooksPath` is set.
 
 ## Notes
 
