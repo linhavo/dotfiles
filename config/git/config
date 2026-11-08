@@ -1,5 +1,8 @@
 # Shared git settings; identity ([user]) stays in the untracked ~/.gitconfig.
 
+[core]
+	# Global hooks: a gitleaks scan, then the repo's own .git/hooks/pre-commit.
+	hooksPath = ~/.config/git/hooks
 [push]
 	autoSetupRemote = true
 [alias]

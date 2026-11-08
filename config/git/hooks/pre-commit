@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Global pre-commit hook, enabled by core.hooksPath in ~/.config/git/config.
+# 1. Scans the staged changes for secrets with gitleaks; findings print redacted.
+# 2. Runs the repo's own .git/hooks/pre-commit, which core.hooksPath would otherwise skip.
+# The commit fails when either step fails.
+
+status=0
+
+# Look in the bootstrap install paths too, because GUI git clients often run with a short PATH.
+gitleaks_bin="$(command -v gitleaks 2>/dev/null)"
+for candidate in "$HOME/.local/bin/gitleaks" /opt/homebrew/bin/gitleaks /usr/local/bin/gitleaks; do
+  [ -n "$gitleaks_bin" ] && break
+  [ -x "$candidate" ] && gitleaks_bin="$candidate"
+done
+
+if [ -n "$gitleaks_bin" ]; then
+  "$gitleaks_bin" git --pre-commit --staged --redact --verbose --no-banner || status=1
+else
+  # Let the commit through, so a fresh machine is not blocked before bootstrap.sh runs.
+  echo "warning: gitleaks is not installed; the commit was NOT scanned for secrets." >&2
+  echo "warning: run bootstrap.sh from linhavo/dotfiles to install it." >&2
+fi
+
+# Use the common dir, so a linked worktree finds the hooks of its main repo.
+local_hook="$(git rev-parse --git-common-dir)/hooks/pre-commit"
+if [ -f "$local_hook" ] && [ -x "$local_hook" ]; then
+  "$local_hook" "$@" || status=1
+fi
+
+exit "$status"
