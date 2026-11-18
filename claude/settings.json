@@ -31,6 +31,14 @@
     "cc-plugin-you-should-know@builtin": true,
     "linear@anthropic-plugin-directory": true
   },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "medium"

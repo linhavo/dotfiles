@@ -333,6 +333,25 @@ install_gitleaks() {
   rm -rf "$tmp"
 }
 
+# Add the GitHub marketplaces that claude/settings.json declares and the CLI does not know yet.
+add_claude_marketplaces() {
+  local known repo
+  known="$(claude plugin marketplace list --json 2>/dev/null | node -e '
+    let d = ""; process.stdin.on("data", c => d += c).on("end", () => {
+      for (const m of JSON.parse(d || "[]")) console.log(m.name);
+    });
+  ' || true)"
+  node -e '
+    const s = require(process.argv[1]);
+    for (const [name, m] of Object.entries(s.extraKnownMarketplaces || {}))
+      if (m.source && m.source.source === "github") console.log(name + " " + m.source.repo);
+  ' "$DOTFILES_DIR/claude/settings.json" | while read -r name repo; do
+    if printf '%s\n' "$known" | grep -qxF "$name"; then continue; fi
+    log "add       marketplace $name ($repo)"
+    run claude plugin marketplace add "$repo" || log "warn      could not add marketplace $name"
+  done
+}
+
 # Install the marketplace plugins that claude/settings.json enables; builtin ones need no install.
 install_claude_plugins() {
   if ! has claude || ! has node; then log "skip      claude plugins (claude or node not on PATH)"; return; fi
@@ -347,8 +366,16 @@ install_claude_plugins() {
       for (const p of JSON.parse(d || "[]")) if (p.scope === "user") console.log(p.id);
     });
   ' || true)"
+  local refreshed=0
   for plugin in $wanted; do
     if printf '%s\n' "$installed" | grep -qxF "$plugin"; then log "ok        $plugin"; continue; fi
+    # Adds missing marketplaces and refreshes all once, because a new machine has none and a stale copy may lack the plugin.
+    if [ "$refreshed" -eq 0 ]; then
+      add_claude_marketplaces
+      log "update    plugin marketplaces"
+      run claude plugin marketplace update || log "warn      marketplace update failed; installing from the local copy"
+      refreshed=1
+    fi
     log "install   $plugin"
     run claude plugin install "$plugin"
   done
