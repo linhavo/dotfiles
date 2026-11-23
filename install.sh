@@ -92,6 +92,14 @@ clear_dest() {
   fi
 }
 
+# Apps that write their own state here get a real folder, so that state stays out of the repo.
+REAL_DIRS=("$XDG_HOME/herdr-app")
+keeps_real_dir() {
+  local dir
+  for dir in "${REAL_DIRS[@]}"; do [ "$1" = "$dir" ] && return 0; done
+  return 1
+}
+
 install_symlink() {
   local src="$1" dest="$2" child
 
@@ -103,7 +111,8 @@ install_symlink() {
   # A real directory already at the target keeps entries this repo does not
   # carry (e.g. ~/.claude/skills/synced), so link its children one level down
   # instead of replacing the directory itself.
-  if [ -d "$src" ] && [ -d "$dest" ] && [ ! -L "$dest" ]; then
+  if [ -d "$src" ] && [ ! -L "$dest" ] && { [ -d "$dest" ] || keeps_real_dir "$dest"; }; then
+    [ -d "$dest" ] || { log "mkdir     $dest"; run mkdir -p "$dest"; }
     shopt -s nullglob dotglob
     for child in "$src"/*; do
       case "$(basename "$child")" in
