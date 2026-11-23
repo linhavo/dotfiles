@@ -1,1 +1,7 @@
 .DS_Store
+
+# Git LFS writes these into the global hooks path; they stay local to each machine.
+config/git/hooks/post-checkout
+config/git/hooks/post-commit
+config/git/hooks/post-merge
+config/git/hooks/pre-push
