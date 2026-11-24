@@ -27,7 +27,8 @@ if term:
     try:
         cw = json.loads(raw).get("context_window") or {}
         used = used_tokens(cw)
-        if used is not None:
+        # 0 means no usage yet (right after /compact or a new session), so the last real count stays
+        if used:
             d = os.path.expanduser("~/.local/state/world-of-codecraft")
             os.makedirs(d, exist_ok=True)
             p = os.path.join(d, f"{term}-ctx.json")
