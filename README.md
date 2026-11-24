@@ -20,7 +20,7 @@ config/           # installed into ~/.config
   git/            # shared git config, global hooks (gitleaks pre-commit)
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 home/             # installed into ~
-  .zshrc          # history, completion (incl. pnpm), autosuggestions, highlighting, starship, pnpm PATH
+  .zshrc          # history, completion (incl. pnpm), autosuggestions, highlighting, starship, pnpm PATH, `srv` (Herdr remote shell)
 Brewfile          # macOS packages for bootstrap.sh
 bootstrap.sh      # installs the essentials, then runs install.sh
 install.sh        # puts everything in place
