@@ -16,6 +16,7 @@ claude/           # installed into ~/.claude
 config/           # installed into ~/.config
   ccstatusline/   # status line layout
   ghostty/        # Ghostty terminal config (config.ghostty)
+  herdr-app/      # Herdr app settings (settings.json); Herdr's own files stay local
   git/            # shared git config, global hooks (gitleaks pre-commit)
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 home/             # installed into ~
@@ -47,6 +48,7 @@ git clone git@github.com:linhavo/dotfiles.git && cd dotfiles
 `bootstrap.sh` detects the OS and package manager, then installs Claude Code, zsh,
 tmux, Node, ccstatusline, gh, lazygit, starship, zsh-autosuggestions,
 zsh-syntax-highlighting, pnpm-shell-completion, gitleaks and the JetBrainsMono Nerd Font.
+On macOS, it also installs the Herdr app.
 It uses Homebrew on macOS and apt, dnf or pacman on Linux.
 It skips tools that are already installed, and skips the font in containers.
 On Linux, it makes zsh the login shell, so new terminals and tmux load `.zshrc`.
