@@ -49,6 +49,20 @@ case ":$PATH:" in
 esac
 # pnpm end
 
+# Herdr remote shell
+## srv [machine] [name] attaches this pane to a kept shell on a Herdr machine, starting it first if needed.
+srv() {
+  local machine="${1:-$SRV_MACHINE}" name="${2:-srv}"
+  if [ -z "$machine" ]; then
+    local machines=(${(f)"$(hc machine ls --json | grep -o '"name":"[^"]*"' | cut -d'"' -f4)"})
+    [ ${#machines} -eq 1 ] || { echo "srv: name a machine: ${machines[*]:-none added}" >&2; return 1; }
+    machine="${machines[1]}"
+  fi
+  hc get "$machine/$name" >/dev/null 2>&1 ||
+    hc run --on "$machine" --bg --keep --no-parent --name "$name" >/dev/null || return
+  hc attach "$machine/$name"
+}
+
 # Machine profile (work, personal, container) that install.sh links.
 source_first "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/profile/zshrc"
 
