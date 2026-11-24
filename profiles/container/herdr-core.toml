@@ -1,0 +1,3 @@
+# herdr-core settings for container machines; install.sh puts this at ~/.config/herdr-core/config.toml.
+# docker exec sets no SHELL, so herdr-core would start /bin/sh; start a login zsh instead.
+shell = ["zsh", "-l"]

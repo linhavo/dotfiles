@@ -5,6 +5,7 @@
 #   config/* -> ~/.config/*
 #   home/*   -> ~/*
 #   profiles/<name>/ -> ~/.config/dotfiles/profile  (git and zsh load it on top of the base)
+#   profiles/<name>/herdr-core.toml -> ~/.config/herdr-core/config.toml  (if the profile has one)
 #
 # Two modes:
 #   symlink (default)  links back to this repo — edits show up in git right away.
@@ -49,7 +50,7 @@ while [ "$#" -gt 0 ]; do
     --profile|-p) [ "$#" -ge 2 ] || { echo "--profile needs a name" >&2; exit 2; }
                   PROFILE="$2"; shift ;;
     --profile=*)  PROFILE="${1#*=}" ;;
-    --help|-h)    sed -n '2,28p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --help|-h)    sed -n '2,29p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
   shift
@@ -193,6 +194,15 @@ install_profile() {
     install_copy "$src" "$dest"
   else
     install_symlink "$src" "$dest"
+  fi
+  # herdr-core reads only its own config path, so a profile's herdr-core.toml goes there.
+  if [ -f "$src/herdr-core.toml" ]; then
+    run mkdir -p "$XDG_HOME/herdr-core"
+    if [ "$MODE" = copy ]; then
+      install_copy "$src/herdr-core.toml" "$XDG_HOME/herdr-core/config.toml"
+    else
+      install_symlink "$src/herdr-core.toml" "$XDG_HOME/herdr-core/config.toml"
+    fi
   fi
   if [ "$(cat "$STATE_DIR/profile-name" 2>/dev/null)" != "$PROFILE" ]; then
     log "save      $STATE_DIR/profile-name = $PROFILE"
