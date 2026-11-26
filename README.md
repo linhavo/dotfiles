@@ -18,6 +18,7 @@ config/           # installed into ~/.config
   ghostty/        # Ghostty terminal config (config.ghostty)
   herdr-app/      # Herdr app settings (settings.json); Herdr's own files stay local
   git/            # shared git config, global hooks (gitleaks pre-commit)
+  rex/            # Rex terminal config (init.lua, default keybindings)
   tmux/           # tmux.conf (tmux ≥ 3.1 reads ~/.config/tmux/tmux.conf)
 home/             # installed into ~
   .zshrc          # history, completion (incl. pnpm), autosuggestions, highlighting, starship, pnpm PATH, `srv` (Herdr remote shell)
