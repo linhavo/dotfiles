@@ -27,6 +27,7 @@
 #   XDG_CONFIG_HOME     target for config/ (default: ~/.config)
 #   DOTFILES_MODE       copy|symlink — same as --copy / default
 #   DOTFILES_PROFILE    same as --profile
+#   WOCC_DIR            World of Codecraft clone to link scripts from (default: ../world-of-codecraft)
 #
 set -euo pipefail
 
@@ -35,6 +36,7 @@ CLAUDE_HOME="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 XDG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 BACKUP_DIR="$CLAUDE_HOME/dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 STATE_DIR="$XDG_HOME/dotfiles"
+WOCC_DIR="${WOCC_DIR:-$(dirname "$DOTFILES_DIR")/world-of-codecraft}"
 
 MODE="${DOTFILES_MODE:-symlink}"
 PROFILE="${DOTFILES_PROFILE:-}"
@@ -50,7 +52,7 @@ while [ "$#" -gt 0 ]; do
     --profile|-p) [ "$#" -ge 2 ] || { echo "--profile needs a name" >&2; exit 2; }
                   PROFILE="$2"; shift ;;
     --profile=*)  PROFILE="${1#*=}" ;;
-    --help|-h)    sed -n '2,29p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --help|-h)    sed -n '2,30p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
   shift
@@ -188,6 +190,24 @@ install_tree() {
 install_tree "$DOTFILES_DIR/claude" "$CLAUDE_HOME"
 install_tree "$DOTFILES_DIR/config" "$XDG_HOME"
 install_tree "$DOTFILES_DIR/home" "$HOME"
+
+# Links World of Codecraft's Claude Code scripts from its clone, because that repo owns them.
+install_wocc() {
+  local src_dir="$WOCC_DIR/integrations/claude-code" name
+  if [ ! -d "$src_dir" ]; then
+    log "skip      World of Codecraft scripts (no clone at $WOCC_DIR; set WOCC_DIR)"
+    return
+  fi
+  for name in wocc-activity.py wocc-statusline.py; do
+    if [ "$MODE" = copy ]; then
+      install_copy "$src_dir/$name" "$CLAUDE_HOME/hooks/$name"
+    else
+      install_symlink "$src_dir/$name" "$CLAUDE_HOME/hooks/$name"
+    fi
+  done
+}
+
+install_wocc
 
 # Install the chosen profile and save its name so later runs reuse it.
 install_profile() {
