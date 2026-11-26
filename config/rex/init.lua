@@ -1,0 +1,2 @@
+-- Rex configuration (https://www.superlogical.com/rex/docs/customize/config).
+-- Keeps Rex's default keybindings; shift+cmd+p lists every action and its shortcut.
