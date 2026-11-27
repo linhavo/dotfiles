@@ -138,7 +138,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "python3 \"$HOME/.claude/hooks/wocc-statusline.py\"",
+    "command": "f=\"$HOME/.claude/hooks/wocc-statusline.py\"; if [ -f \"$f\" ]; then python3 \"$f\"; else ccstatusline; fi",
     "padding": 0,
     "refreshInterval": 10
   },
